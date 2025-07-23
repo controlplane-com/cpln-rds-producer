@@ -19,7 +19,7 @@ When using existing infrastructure (`create_infrastructure = false`), the module
 - **Subnet IDs** from the RDS subnet group
 - **VPC CIDR** from the existing VPC
 
-Users only need to provide the RDS instance identifier and Secrets Manager ARN.
+Users only need to provide the RDS instance ARN and Secrets Manager ARN.
 
 ## Prerequisites
 
@@ -189,15 +189,3 @@ module "rds_producer" {
   allowed_principal_arn = "arn:aws:iam::123456789012:root"
 }
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## License
-
-This project is licensed under the MIT License. 
