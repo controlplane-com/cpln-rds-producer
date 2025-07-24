@@ -21,4 +21,9 @@ output "target_group_name" {
 output "listener_arn" {
   description = "NLB Listener ARN"
   value       = aws_lb_listener.nlb_listener.arn
+}
+
+output "region" {
+  description = "AWS region extracted from NLB ARN"
+  value       = split(":", aws_lb.rds_proxy_nlb.arn)[3]
 } 

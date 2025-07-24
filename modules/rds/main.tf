@@ -6,9 +6,9 @@ module "rds" {
 
   # Engine configuration
   engine               = "postgres"
-  engine_version       = var.engine_version
-  instance_class       = var.instance_class
-  allocated_storage    = var.allocated_storage
+  engine_version       = var.rds_engine_version
+  instance_class       = var.rds_instance_class
+  allocated_storage    = var.rds_allocated_storage
 
   # Credentials
   db_name  = "postgres"
@@ -41,6 +41,9 @@ module "rds" {
   create_db_subnet_group = true
 
   tags = {
-    Name = "rds-instance"
+    Name        = "rds-instance"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 } 

@@ -6,6 +6,9 @@ resource "aws_vpc_endpoint_service" "rds_proxy_service" {
   allowed_principals = [var.allowed_principal_arn]
 
   tags = {
-    Name = "rds-proxy-endpoint-service"
+    Name        = "rds-proxy-endpoint-service"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 } 

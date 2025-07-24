@@ -5,7 +5,10 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
 
   tags = {
-    Name = var.vpc_name
+    Name        = var.vpc_name
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -16,7 +19,10 @@ resource "aws_subnet" "private_1" {
   availability_zone = data.aws_availability_zones.available.names[0]
 
   tags = {
-    Name = var.subnet_1_name
+    Name        = var.subnet_1_name
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -26,7 +32,10 @@ resource "aws_subnet" "private_2" {
   availability_zone = data.aws_availability_zones.available.names[1]
 
   tags = {
-    Name = var.subnet_2_name
+    Name        = var.subnet_2_name
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -35,7 +44,10 @@ resource "aws_secretsmanager_secret" "db_secret" {
   name = "db-credentials"
   
   tags = {
-    Name = "db-secret"
+    Name        = "db-secret"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 }
 

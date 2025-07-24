@@ -19,7 +19,10 @@ resource "aws_security_group" "rds_proxy" {
   }
 
   tags = {
-    Name = "rds-proxy-sg"
+    Name        = "rds-proxy-sg"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -77,7 +80,10 @@ resource "aws_db_proxy" "proxy" {
   }
 
   tags = {
-    Name = "rds-proxy"
+    Name        = "rds-proxy"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 }
 

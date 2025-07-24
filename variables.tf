@@ -1,22 +1,23 @@
 variable "aws_region" {
-  description = "AWS region"
+  description = "AWS region (required when creating new infrastructure)"
   type        = string
+  default     = null
 }
 
 variable "create_infrastructure" {
-  description = "Whether to create new infrastructure (VPC, subnets, RDS) or use existing"
+  description = "Whether to create new infrastructure (VPC, subnets, RDS) or use existing. Auto-detected based on ARN presence."
   type        = bool
-  default     = true
+  default     = null
 }
 
 variable "db_instance_arn" {
-  description = "ARN of existing RDS instance (required when create_infrastructure = false)"
+  description = "ARN of existing RDS instance (required when using existing infrastructure)"
   type        = string
   default     = null
 }
 
 variable "secret_arn" {
-  description = "ARN of existing Secrets Manager secret (required when create_infrastructure = false)"
+  description = "ARN of existing Secrets Manager secret (required when using existing infrastructure)"
   type        = string
   default     = null
 }
@@ -29,26 +30,16 @@ variable "allowed_principal_arn" {
 
 # Database credentials (required when create_infrastructure = true)
 variable "db_username" {
-  description = "Database username"
+  description = "Database username (required when creating new infrastructure)"
   type        = string
   default     = null
-
-  validation {
-    condition     = var.create_infrastructure ? var.db_username != null : true
-    error_message = "db_username is required when create_infrastructure = true."
-  }
 }
 
 variable "db_password" {
-  description = "Database password"
+  description = "Database password (required when creating new infrastructure)"
   type        = string
   default     = null
   sensitive   = true
-
-  validation {
-    condition     = var.create_infrastructure ? var.db_password != null : true
-    error_message = "db_password is required when create_infrastructure = true."
-  }
 }
 
 # Infrastructure variables (used when create_infrastructure = true)

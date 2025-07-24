@@ -19,19 +19,19 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "instance_class" {
+variable "rds_instance_class" {
   description = "RDS instance class"
   type        = string
   default     = "db.t3.micro"
 }
 
-variable "allocated_storage" {
+variable "rds_allocated_storage" {
   description = "RDS allocated storage in GB"
   type        = number
   default     = 20
 }
 
-variable "engine_version" {
+variable "rds_engine_version" {
   description = "RDS engine version"
   type        = string
   default     = "15.4"

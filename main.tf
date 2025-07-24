@@ -9,7 +9,7 @@ terraform {
 }
 
 provider "aws" {
-  region = var.aws_region
+  region = local.aws_region
 }
 
 # Retrieve AZ options
@@ -17,40 +17,47 @@ data "aws_availability_zones" "available" {
   state = "available"
 }
 
+# Auto-detect infrastructure mode and compute all local values
+locals {
+  # Auto-detect: if ARNs are provided, use existing infrastructure; otherwise create new
+  auto_create_infrastructure = var.db_instance_arn == null && var.secret_arn == null
+  
+  # Use explicit setting if provided, otherwise use auto-detection
+  create_infrastructure = var.create_infrastructure != null ? var.create_infrastructure : local.auto_create_infrastructure
+  
+  # Extract region from ARN for provider configuration
+  aws_region = local.create_infrastructure ? var.aws_region : split(":", var.db_instance_arn)[3]
+  
+  # If creating infrastructure, use module outputs; otherwise use data sources
+  vpc_id      = local.create_infrastructure ? module.infrastructure[0].vpc_id : data.aws_vpc.existing[0].id
+  subnet_ids  = local.create_infrastructure ? module.infrastructure[0].subnet_ids : data.aws_db_subnet_group.existing[0].subnet_ids
+  vpc_cidr    = local.create_infrastructure ? var.vpc_cidr : data.aws_vpc.existing[0].cidr_block
+  secret_arn  = local.create_infrastructure ? module.infrastructure[0].secret_arn : var.secret_arn
+  db_instance_identifier = local.create_infrastructure ? null : data.aws_db_instance.existing[0].id
+}
+
 # Data sources for existing RDS instance (when not creating infrastructure)
 data "aws_db_instance" "existing" {
-  count = var.create_infrastructure ? 0 : 1
-  db_instance_identifier = local.db_instance_identifier
+  count = local.create_infrastructure ? 0 : 1
+  db_instance_identifier = split(":", var.db_instance_arn)[6]
 }
 
 # Get subnet group from existing RDS instance
 data "aws_db_subnet_group" "existing" {
-  count = var.create_infrastructure ? 0 : 1
+  count = local.create_infrastructure ? 0 : 1
   name = data.aws_db_instance.existing[0].db_subnet_group
 }
 
 # Get VPC from existing RDS instance's subnet group
 data "aws_vpc" "existing" {
-  count = var.create_infrastructure ? 0 : 1
+  count = local.create_infrastructure ? 0 : 1
   id = data.aws_db_subnet_group.existing[0].vpc_id
-}
-
-# Local values to simplify conditional logic
-locals {
-  # Extract RDS instance identifier from ARN
-  db_instance_identifier = var.create_infrastructure ? null : split(":", var.db_instance_arn)[6]
-  
-  # If creating infrastructure, use module outputs; otherwise use data sources
-  vpc_id      = var.create_infrastructure ? module.infrastructure[0].vpc_id : data.aws_vpc.existing[0].id
-  subnet_ids  = var.create_infrastructure ? module.infrastructure[0].subnet_ids : data.aws_db_subnet_group.existing[0].subnet_ids
-  vpc_cidr    = var.create_infrastructure ? var.vpc_cidr : data.aws_vpc.existing[0].cidr_block
-  secret_arn  = var.create_infrastructure ? module.infrastructure[0].secret_arn : var.secret_arn
 }
 
 # Step 1: Infrastructure (conditional)
 # If creating infrastructure, generate VPC, subnets, and Secrets Manager secret
 module "infrastructure" {
-  count  = var.create_infrastructure ? 1 : 0
+  count  = local.create_infrastructure ? 1 : 0
   source = "./modules/infrastructure"
 
   vpc_cidr     = var.vpc_cidr
@@ -64,16 +71,16 @@ module "infrastructure" {
 # Step 2: RDS Instance (conditional)
 # If creating infrastructure, create new RDS instance; otherwise use existing one
 module "rds" {
-  count  = var.create_infrastructure ? 1 : 0
+  count  = local.create_infrastructure ? 1 : 0
   source = "./modules/rds"
 
   vpc_id               = local.vpc_id
   subnet_ids           = local.subnet_ids
   db_username          = var.db_username
   db_password          = var.db_password
-  instance_class       = var.rds_instance_class
-  allocated_storage    = var.rds_allocated_storage
-  engine_version       = var.rds_engine_version
+  rds_instance_class    = var.rds_instance_class
+  rds_allocated_storage = var.rds_allocated_storage
+  rds_engine_version    = var.rds_engine_version
 }
 
 # Step 3: RDS Proxy (required)
@@ -85,7 +92,7 @@ module "rds_proxy" {
   vpc_cidr               = local.vpc_cidr
   subnet_ids             = local.subnet_ids
   secret_arn             = local.secret_arn
-  db_instance_identifier = var.create_infrastructure ? module.rds[0].db_instance_identifier : local.db_instance_identifier
+  db_instance_identifier = local.create_infrastructure ? module.rds[0].db_instance_identifier : local.db_instance_identifier
 }
 
 # Step 4: Load Balancer (required)
@@ -104,4 +111,16 @@ module "vpc_endpoint" {
 
   nlb_arn                 = module.load_balancer.nlb_arn
   allowed_principal_arn   = var.allowed_principal_arn
+}
+
+# Step 6: Lambda Function (required)
+# Creates Lambda function to update target group with RDS Proxy IP
+module "lambda_function" {
+  source = "./modules/lambda-function"
+
+  aws_region         = local.aws_region
+  target_group_arn   = module.load_balancer.target_group_arn
+  rds_proxy_endpoint = module.rds_proxy.proxy_endpoint
+  lambda_function_name = "cpln_update_target_group_ips"
+  dns_nameserver     = "8.8.8.8"
 } 

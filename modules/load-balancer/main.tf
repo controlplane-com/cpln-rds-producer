@@ -15,7 +15,10 @@ resource "aws_lb_target_group" "rds_proxy_tg" {
   }
 
   tags = {
-    Name = "rds-proxy-tg"
+    Name        = "rds-proxy-tg"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 }
 
@@ -29,7 +32,10 @@ resource "aws_lb" "rds_proxy_nlb" {
   enable_cross_zone_load_balancing = true
 
   tags = {
-    Name = "rds-proxy-nlb"
+    Name        = "rds-proxy-nlb"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
   }
 }
 

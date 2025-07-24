@@ -9,7 +9,6 @@ output "subnet_ids" {
 }
 
 
-
 output "secret_arn" {
   description = "Secrets Manager ARN"
   value       = aws_secretsmanager_secret.db_secret.arn
