@@ -19,30 +19,64 @@ Terraform modules for creating an RDS Producer infrastructure with PrivateLink e
 - **Lambda Function** - Dynamic IP updates
 - **PrivateLink Endpoint Service** - Control Plane cross-account access
 
+## Prerequisites
+
+Before running these Terraform modules, ensure you have the following:
+
+### **Required Software:**
+- **Terraform** >= 1.0 ([Download](https://www.terraform.io/downloads.html))
+- **AWS CLI** >= 2.0 ([Download](https://aws.amazon.com/cli/))
+- **Git** (for cloning the repository)
+
+### **AWS Account Requirements:**
+- **Active AWS Account** with billing enabled
+- **AWS IAM User/Role** with appropriate permissions (see below)
+- **AWS Region** where you want to deploy resources
+
+### **Required AWS Permissions:**
+Your AWS credentials must have permissions for:
+- **EC2**: Create VPC, subnets, security groups, load balancers
+- **RDS**: Create/modify RDS instances, proxies, parameter groups
+- **Secrets Manager**: Create/read secrets
+- **Lambda**: Create functions, roles, and CloudWatch triggers
+- **IAM**: Create roles and policies
+- **VPC Endpoints**: Create endpoint services
+- **CloudWatch**: Create event rules and logs
+
+### **For Existing Infrastructure Mode:**
+- **RDS Instance** already created and available
+- **Secrets Manager Secret** with database credentials in JSON format
+- **VPC and Subnets** where RDS instance is located
+
+### **Network Requirements:**
+- **VPC** with private subnets (for new infrastructure mode)
+- **Internet connectivity** for Terraform to download providers
+- **DNS resolution** enabled in VPC
+
+### **Cost Considerations:**
+- **RDS Instance**: ~$15-50/month depending on instance type
+- **RDS Proxy**: ~$20/month
+- **Network Load Balancer**: ~$18/month
+- **Lambda**: ~$1/month (minimal usage)
+- **Secrets Manager**: ~$0.40/month
+- **VPC Endpoints**: ~$0.01/hour per endpoint
+
+### **Security Considerations:**
+- **Database credentials** should be strong and secure
+- **VPC** should be properly configured with security groups
+- **Secrets Manager** should have appropriate access policies
+- **IAM roles** follow least privilege principle
+
 ## Required Inputs
 
 ### For New Infrastructure:
-```hcl
-module "rds_producer" {
-  source = "./modules"
-  
-  allowed_principal_arn = "arn:aws:iam::123456789012:root"
-  aws_region = "us-west-2"
-  db_username = "admin"
-  db_password = "SecurePassword123!"
-}
-```
+- `aws_region` - AWS region for all resources
+- `db_username` - Database username for new RDS instance  
+- `db_password` - Database password for new RDS instance
 
 ### For Existing Infrastructure:
-```hcl
-module "rds_producer" {
-  source = "./modules"
-  
-  allowed_principal_arn = "arn:aws:iam::123456789012:root"
-  db_instance_arn = "arn:aws:rds:us-west-2:123456789012:db:my-db"
-  secret_arn = "arn:aws:secretsmanager:us-west-2:123456789012:secret:my-secret"
-}
-```
+- `db_instance_arn` - ARN of existing RDS instance
+- `secret_arn` - ARN of existing Secrets Manager secret with database credentials
 
 ## Why RDS Proxy and Secrets Manager Are Required
 
@@ -80,17 +114,17 @@ The Lambda function automatically:
 
 **terraform.tfvars (New Infrastructure):**
 ```hcl
-allowed_principal_arn = "arn:aws:iam::123456789012:root"
 aws_region = "us-west-2"
 db_username = "admin"
 db_password = "SecurePassword123!"
+# allowed_principal_arn defaults to Control Plane ARN
 ```
 
 **terraform.tfvars (Existing Infrastructure):**
 ```hcl
-allowed_principal_arn = "arn:aws:iam::123456789012:root"
 db_instance_arn = "arn:aws:rds:us-west-2:123456789012:db:my-db"
 secret_arn = "arn:aws:secretsmanager:us-west-2:123456789012:secret:my-secret"
+# allowed_principal_arn defaults to Control Plane ARN
 ```
 
 **main.tf:**
@@ -108,10 +142,10 @@ terraform {
 module "rds_producer" {
   source = "./modules"
   
-  allowed_principal_arn = var.allowed_principal_arn
   aws_region = var.aws_region
   db_username = var.db_username
   db_password = var.db_password
+  # allowed_principal_arn defaults to Control Plane ARN
 }
 ```
 
@@ -158,14 +192,9 @@ terraform validate
 terraform plan
 ```
 
-## Cost Estimate
-
-**New Infrastructure:** ~$53/month (RDS + Proxy + NLB + Secrets)
-**Existing Infrastructure:** ~$38/month (Proxy + NLB only)
-
 ## Support
 
 For issues or questions:
 1. Check troubleshooting section above
 2. Review AWS documentation
-3. Open an issue in this repository
+3. Contact [support@controlplane.com](mailto:support@controlplane.com)

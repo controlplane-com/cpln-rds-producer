@@ -11,8 +11,8 @@ terraform {
 
 data "archive_file" "lambda" {
   type        = "zip"
-  source_dir  = "./src"
-  output_path = "./update-ip.zip"
+  source_dir  = "${path.module}/src"
+  output_path = "${path.module}/update-ip.zip"
 }
 
 resource "aws_lambda_function" "lambda_update_ips" {
@@ -20,7 +20,7 @@ resource "aws_lambda_function" "lambda_update_ips" {
   role             = aws_iam_role.cpln_private_link_role.arn
   runtime          = "python3.12"
   handler          = "update-ip.lambda_handler"
-  filename         = "update-ip.zip"
+  filename         = data.archive_file.lambda.output_path
   source_code_hash = data.archive_file.lambda.output_base64sha256
 
   environment {
@@ -43,43 +43,6 @@ resource "aws_lambda_function" "lambda_update_ips" {
 resource "aws_iam_role" "cpln_private_link_role" {
   name_prefix = "cpln_private_link_"
 
-  inline_policy {
-    name = "lambda_policy"
-    policy = jsonencode({
-      "Version" : "2012-10-17",
-      "Statement" : [
-        {
-          "Effect" : "Allow",
-          "Action" : "elasticloadbalancing:DescribeTargetHealth",
-          "Resource" : "*"
-        },
-        {
-          "Effect" : "Allow",
-          "Action" : [
-            "elasticloadbalancing:RegisterTargets",
-            "elasticloadbalancing:DeregisterTargets"
-          ],
-          "Resource" : [var.target_group_arn]
-        },
-        {
-          "Effect" : "Allow",
-          "Action" : "logs:CreateLogGroup",
-          "Resource" : "arn:aws:logs:${var.aws_region}:*:*"
-        },
-        {
-          "Effect" : "Allow",
-          "Action" : [
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-          ],
-          "Resource" : [
-            "arn:aws:logs:${var.aws_region}:*:log-group:/aws/lambda/${var.lambda_function_name}:*"
-          ]
-        }
-      ]
-    })
-  }
-
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -100,6 +63,45 @@ resource "aws_iam_role" "cpln_private_link_role" {
     Project     = "rds-producer"
     ManagedBy   = "terraform"
   }
+}
+
+resource "aws_iam_role_policy" "lambda_policy" {
+  name = "lambda_policy"
+  role = aws_iam_role.cpln_private_link_role.id
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : "elasticloadbalancing:DescribeTargetHealth",
+        "Resource" : "*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets"
+        ],
+        "Resource" : [var.target_group_arn]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : "logs:CreateLogGroup",
+        "Resource" : "arn:aws:logs:${var.aws_region}:*:*"
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource" : [
+          "arn:aws:logs:${var.aws_region}:*:log-group:/aws/lambda/${var.lambda_function_name}:*"
+        ]
+      }
+    ]
+  })
 }
 
 # CloudWatch trigger and permission

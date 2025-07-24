@@ -6,7 +6,8 @@ module "rds" {
 
   # Engine configuration
   engine               = "postgres"
-  engine_version       = var.rds_engine_version
+  engine_version       = "15.12"
+  family               = "postgres15"
   instance_class       = var.rds_instance_class
   allocated_storage    = var.rds_allocated_storage
 

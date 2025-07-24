@@ -83,5 +83,5 @@ variable "rds_allocated_storage" {
 variable "rds_engine_version" {
   description = "RDS engine version"
   type        = string
-  default     = "15.4"
+  default     = "15.12"
 } 
