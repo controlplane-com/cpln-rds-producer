@@ -163,21 +163,14 @@ terraform output
 
 ## Outputs and Next Steps
 
-### Essential Outputs:
+### Output:
 - **`privatelink_service_name`** - PrivateLink Endpoint Service Name for Control Plane
-- **`mode`** - Operation mode (new vs existing infrastructure)
-- **`region`** - AWS region
 
 ### What to Do Next:
 1. **Copy the `privatelink_service_name`** from the outputs
 2. **Provide it to Control Plane support** to create the PrivateLink endpoint
 3. **Wait for endpoint creation** to complete
 4. **Test connectivity** from your Control Plane environment
-
-### Testing Outputs:
-- **`lambda_function_arn`** - Monitor Lambda execution
-- **`target_group_arn`** - Verify target group updates
-- **`rds_proxy_endpoint`** - Test proxy connectivity
 
 ## Troubleshooting
 
