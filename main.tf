@@ -66,6 +66,9 @@ module "infrastructure" {
   subnet_2_name = var.subnet_2_name
   db_username  = var.db_username
   db_password  = var.db_password
+  aws_region   = local.aws_region
+  secret_name  = var.secret_name
+  lambda_security_group_id = module.lambda_function.lambda_security_group_id
 }
 
 # Step 2: RDS Instance (conditional)
@@ -122,5 +125,7 @@ module "lambda_function" {
   target_group_arn   = module.load_balancer.target_group_arn
   rds_proxy_endpoint = module.rds_proxy.proxy_endpoint
   lambda_function_name = "cpln_update_target_group_ips"
-  dns_nameserver     = "8.8.8.8"
+  dns_nameserver     = "169.254.169.253"  # AWS internal DNS
+  vpc_id             = local.vpc_id
+  subnet_ids         = local.subnet_ids
 } 

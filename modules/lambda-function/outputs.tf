@@ -3,6 +3,11 @@ output "lambda_function_arn" {
   value       = aws_lambda_function.lambda_update_ips.arn
 }
 
+output "lambda_security_group_id" {
+  description = "Lambda security group ID"
+  value       = aws_security_group.lambda.id
+}
+
 output "lambda_function_name" {
   description = "Lambda function name"
   value       = aws_lambda_function.lambda_update_ips.function_name

@@ -22,5 +22,15 @@ variable "lambda_function_name" {
 variable "dns_nameserver" {
   description = "DNS nameserver to use for resolution"
   type        = string
-  default     = "8.8.8.8"
+  default     = "169.254.169.253"  # AWS internal DNS
+}
+
+variable "vpc_id" {
+  description = "VPC ID for Lambda security group"
+  type        = string
+}
+
+variable "subnet_ids" {
+  description = "Subnet IDs for Lambda VPC configuration"
+  type        = list(string)
 } 

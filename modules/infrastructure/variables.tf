@@ -30,4 +30,21 @@ variable "db_password" {
   description = "Database password"
   type        = string
   sensitive   = true
+}
+
+variable "aws_region" {
+  description = "AWS region for VPC endpoints"
+  type        = string
+}
+
+variable "lambda_security_group_id" {
+  description = "Lambda security group ID for VPC endpoint access"
+  type        = string
+  default     = null
+}
+
+variable "secret_name" {
+  description = "Name for the Secrets Manager secret"
+  type        = string
+  default     = "db-credentials"
 } 

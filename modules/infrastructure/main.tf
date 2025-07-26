@@ -41,7 +41,7 @@ resource "aws_subnet" "private_2" {
 
 # Secrets Manager Secret
 resource "aws_secretsmanager_secret" "db_secret" {
-  name = "db-credentials"
+  name = var.secret_name
   
   tags = {
     Name        = "db-secret"
@@ -62,4 +62,83 @@ resource "aws_secretsmanager_secret_version" "db_secret_version" {
 # Data sources
 data "aws_availability_zones" "available" {
   state = "available"
+} 
+
+# Security Group for VPC Endpoints
+resource "aws_security_group" "vpc_endpoints" {
+  name        = "vpc-endpoints-sg"
+  description = "Security group for VPC endpoints"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    from_port       = 443
+    to_port         = 443
+    protocol        = "tcp"
+    security_groups = [var.lambda_security_group_id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "vpc-endpoints-sg"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
+  }
+}
+
+# ELBv2 VPC Endpoint
+resource "aws_vpc_endpoint" "elbv2" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${var.aws_region}.elasticloadbalancing"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "elbv2-endpoint"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
+  }
+}
+
+# CloudWatch Logs VPC Endpoint
+resource "aws_vpc_endpoint" "cloudwatch_logs" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${var.aws_region}.logs"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "cloudwatch-logs-endpoint"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
+  }
+}
+
+# CloudWatch Monitoring VPC Endpoint
+resource "aws_vpc_endpoint" "cloudwatch_monitoring" {
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.${var.aws_region}.monitoring"
+  vpc_endpoint_type = "Interface"
+  subnet_ids        = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+  security_group_ids = [aws_security_group.vpc_endpoints.id]
+  private_dns_enabled = true
+
+  tags = {
+    Name        = "cloudwatch-monitoring-endpoint"
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
+  }
 } 

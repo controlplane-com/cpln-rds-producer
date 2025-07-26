@@ -22,6 +22,7 @@ resource "aws_lambda_function" "lambda_update_ips" {
   handler          = "update-ip.lambda_handler"
   filename         = data.archive_file.lambda.output_path
   source_code_hash = data.archive_file.lambda.output_base64sha256
+  timeout          = 30
 
   environment {
     variables = {
@@ -33,6 +34,32 @@ resource "aws_lambda_function" "lambda_update_ips" {
 
   tags = {
     Name        = var.lambda_function_name
+    Environment = "production"
+    Project     = "rds-producer"
+    ManagedBy   = "terraform"
+  }
+
+  vpc_config {
+    subnet_ids         = var.subnet_ids
+    security_group_ids = [aws_security_group.lambda.id]
+  }
+}
+
+# Security Group for Lambda function
+resource "aws_security_group" "lambda" {
+  name        = "lambda-sg"
+  description = "Security group for Lambda function"
+  vpc_id      = var.vpc_id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name        = "${var.lambda_function_name}-sg"
     Environment = "production"
     Project     = "rds-producer"
     ManagedBy   = "terraform"
@@ -99,6 +126,15 @@ resource "aws_iam_role_policy" "lambda_policy" {
         "Resource" : [
           "arn:aws:logs:${var.aws_region}:*:log-group:/aws/lambda/${var.lambda_function_name}:*"
         ]
+      },
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "ec2:CreateNetworkInterface",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DeleteNetworkInterface"
+        ],
+        "Resource" : "*"
       }
     ]
   })

@@ -59,7 +59,10 @@ Your AWS credentials must have permissions for:
 - **Network Load Balancer**: ~$18/month
 - **Lambda**: ~$1/month (minimal usage)
 - **Secrets Manager**: ~$0.40/month
-- **VPC Endpoints**: ~$0.01/hour per endpoint
+- **VPC Endpoints**: ~$0.01/hour per endpoint (~$7.30/month each)
+  - ELBv2 endpoint for Lambda to access Load Balancer API
+  - CloudWatch Logs endpoint for Lambda logging
+  - CloudWatch Monitoring endpoint for Lambda metrics
 
 ### **Security Considerations:**
 - **Database credentials** should be strong and secure
@@ -108,6 +111,19 @@ The Lambda function automatically:
 
 **No manual setup required** - created and configured automatically.
 
+### Lambda VPC Configuration and Security
+
+The Lambda function runs within the VPC and uses **VPC Endpoints** for secure AWS service access:
+
+- **ELBv2 VPC Endpoint**: Enables Lambda to securely call the Elastic Load Balancing API without internet access
+- **CloudWatch Logs VPC Endpoint**: Allows Lambda to send logs to CloudWatch securely
+- **CloudWatch Monitoring VPC Endpoint**: Enables Lambda metrics collection
+
+**Benefits:**
+- **Enhanced Security**: No internet access required for AWS service communication
+- **Private DNS Resolution**: Automatic resolution of AWS service endpoints to VPC endpoint IPs
+- **Network Isolation**: All traffic stays within the VPC private network
+
 ## Getting Started
 
 ### 1. Create Configuration Files
@@ -115,7 +131,7 @@ The Lambda function automatically:
 **terraform.tfvars (New Infrastructure):**
 ```hcl
 aws_region = "us-west-2"
-db_username = "admin"
+db_username = "postgres"
 db_password = "SecurePassword123!"
 # allowed_principal_arn defaults to Control Plane ARN
 ```

@@ -84,4 +84,10 @@ variable "rds_engine_version" {
   description = "RDS engine version"
   type        = string
   default     = "15.12"
+}
+
+variable "secret_name" {
+  description = "Name for the Secrets Manager secret (optional, defaults to 'db-credentials')"
+  type        = string
+  default     = "db-credentials"
 } 

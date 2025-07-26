@@ -54,4 +54,7 @@ terraform.rc
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db 
+Thumbs.db
+
+# Terraform generated files
+*.zip 

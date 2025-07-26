@@ -7,7 +7,8 @@ import dns.resolver
 NLB_TARGET_GROUP_ARNs = os.environ['NLB_TARGET_GROUP_ARN'].split(',')
 SERVICE_FQDNs = os.environ['SERVICE_FQDN'].split(',')
 REGION = os.environ['AWS_REGION']
-DNS_NAMESERVER = os.environ.get('DNS_NAMESERVER', '8.8.8.8')
+DNS_NAMESERVER = os.environ.get('DNS_NAMESERVER', '169.254.169.253')  # AWS internal DNS
+
 
 # Initialize Boto3 client
 elbv2 = boto3.client('elbv2', region_name=REGION)
