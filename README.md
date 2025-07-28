@@ -59,10 +59,7 @@ Your AWS credentials must have permissions for:
 - **Network Load Balancer**: ~$18/month
 - **Lambda**: ~$1/month (minimal usage)
 - **Secrets Manager**: ~$0.40/month
-- **VPC Endpoints**: ~$0.01/hour per endpoint (~$7.30/month each)
-  - ELBv2 endpoint for Lambda to access Load Balancer API
-  - CloudWatch Logs endpoint for Lambda logging
-  - CloudWatch Monitoring endpoint for Lambda metrics
+- **CloudWatch**: ~$0.00/month (within free tier)
 
 ### **Security Considerations:**
 - **Database credentials** should be strong and secure
@@ -111,18 +108,19 @@ The Lambda function automatically:
 
 **No manual setup required** - created and configured automatically.
 
-### Lambda VPC Configuration and Security
+### Lambda Configuration and Security
 
-The Lambda function runs within the VPC and uses **VPC Endpoints** for secure AWS service access:
+The Lambda function runs outside the VPC for cost optimization and simplicity:
 
-- **ELBv2 VPC Endpoint**: Enables Lambda to securely call the Elastic Load Balancing API without internet access
-- **CloudWatch Logs VPC Endpoint**: Allows Lambda to send logs to CloudWatch securely
-- **CloudWatch Monitoring VPC Endpoint**: Enables Lambda metrics collection
+- **AWS API Access**: Direct HTTPS calls to AWS services (ELB, CloudWatch)
+- **DNS Resolution**: Uses AWS DNS resolver for RDS proxy endpoint resolution
+- **Security**: IAM policies control access to AWS services
 
 **Benefits:**
-- **Enhanced Security**: No internet access required for AWS service communication
-- **Private DNS Resolution**: Automatic resolution of AWS service endpoints to VPC endpoint IPs
-- **Network Isolation**: All traffic stays within the VPC private network
+- **Cost Effective**: No VPC endpoints required (~$22/month savings)
+- **Simpler Architecture**: No VPC dependencies or complex networking
+- **Reliable**: Direct AWS service connectivity
+- **Secure**: HTTPS calls with IAM authentication
 
 ## Getting Started
 

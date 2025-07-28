@@ -25,12 +25,4 @@ variable "dns_nameserver" {
   default     = "169.254.169.253"  # AWS internal DNS
 }
 
-variable "vpc_id" {
-  description = "VPC ID for Lambda security group"
-  type        = string
-}
-
-variable "subnet_ids" {
-  description = "Subnet IDs for Lambda VPC configuration"
-  type        = list(string)
-} 
+ 

@@ -38,33 +38,9 @@ resource "aws_lambda_function" "lambda_update_ips" {
     Project     = "rds-producer"
     ManagedBy   = "terraform"
   }
-
-  vpc_config {
-    subnet_ids         = var.subnet_ids
-    security_group_ids = [aws_security_group.lambda.id]
-  }
 }
 
-# Security Group for Lambda function
-resource "aws_security_group" "lambda" {
-  name        = "lambda-sg"
-  description = "Security group for Lambda function"
-  vpc_id      = var.vpc_id
 
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name        = "${var.lambda_function_name}-sg"
-    Environment = "production"
-    Project     = "rds-producer"
-    ManagedBy   = "terraform"
-  }
-}
 
 # Policy and Role for lambda function
 resource "aws_iam_role" "cpln_private_link_role" {
