@@ -141,28 +141,6 @@ secret_arn = "arn:aws:secretsmanager:us-west-2:123456789012:secret:my-secret"
 # allowed_principal_arn defaults to Control Plane ARN
 ```
 
-**main.tf:**
-```hcl
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-module "rds_producer" {
-  source = "./modules"
-  
-  aws_region = var.aws_region
-  db_username = var.db_username
-  db_password = var.db_password
-  # allowed_principal_arn defaults to Control Plane ARN
-}
-```
-
 ### 2. Deploy Infrastructure
 ```bash
 terraform init
@@ -170,7 +148,7 @@ terraform plan
 terraform apply
 ```
 
-### 3. Get Outputs
+### 3. Get Outputs (automatic)
 ```bash
 terraform output
 ```
