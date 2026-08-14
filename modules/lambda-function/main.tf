@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.0"
     }
   }
 }
@@ -18,7 +18,7 @@ data "archive_file" "lambda" {
 resource "aws_lambda_function" "lambda_update_ips" {
   function_name    = var.lambda_function_name
   role             = aws_iam_role.cpln_private_link_role.arn
-  runtime          = "python3.12"
+  runtime          = "python3.14"
   handler          = "update-ip.lambda_handler"
   filename         = data.archive_file.lambda.output_path
   source_code_hash = data.archive_file.lambda.output_base64sha256

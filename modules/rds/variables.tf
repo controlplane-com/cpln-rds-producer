@@ -3,6 +3,11 @@ variable "vpc_id" {
   type        = string
 }
 
+variable "vpc_cidr" {
+  description = "VPC CIDR block allowed to reach the database on 5432"
+  type        = string
+}
+
 variable "subnet_ids" {
   description = "Subnet IDs for RDS instance"
   type        = list(string)
@@ -34,5 +39,11 @@ variable "rds_allocated_storage" {
 variable "rds_engine_version" {
   description = "RDS engine version"
   type        = string
-  default     = "15.4"
+  default     = "15.18"
+}
+
+variable "db_password_version" {
+  description = "Increment to push a changed db_password to the RDS instance (write-only password versioning)"
+  type        = number
+  default     = 1
 } 
