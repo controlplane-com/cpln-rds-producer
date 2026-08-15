@@ -57,4 +57,11 @@ ehthumbs.db
 Thumbs.db
 
 # Terraform generated files
-*.zip 
+*.zip
+
+# Python bytecode
+__pycache__/
+*.pyc
+
+# Claude Code local files
+.claude/ 

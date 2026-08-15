@@ -87,6 +87,14 @@ resource "aws_db_proxy" "proxy" {
   }
 }
 
-# RDS Proxy Default Target Group (created automatically)
-# The target group is created automatically when the proxy is created
-# and targets are added via the aws_db_proxy_default_target_group resource 
+# Register the database instance as the proxy's target. AWS creates the
+# default target group with the proxy, but does not register any targets.
+resource "aws_db_proxy_default_target_group" "this" {
+  db_proxy_name = aws_db_proxy.proxy.name
+}
+
+resource "aws_db_proxy_target" "db" {
+  db_proxy_name          = aws_db_proxy.proxy.name
+  target_group_name      = aws_db_proxy_default_target_group.this.name
+  db_instance_identifier = var.db_instance_identifier
+} 

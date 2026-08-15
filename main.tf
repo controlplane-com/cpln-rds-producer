@@ -1,9 +1,9 @@
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.11.1"
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = "~> 6.0"
     }
   }
 }
@@ -76,10 +76,12 @@ module "rds" {
   count  = local.create_infrastructure ? 1 : 0
   source = "./modules/rds"
 
-  vpc_id               = local.vpc_id
-  subnet_ids           = local.subnet_ids
-  db_username          = var.db_username
-  db_password          = var.db_password
+  vpc_id                = local.vpc_id
+  vpc_cidr              = local.vpc_cidr
+  subnet_ids            = local.subnet_ids
+  db_username           = var.db_username
+  db_password           = var.db_password
+  db_password_version   = var.db_password_version
   rds_instance_class    = var.rds_instance_class
   rds_allocated_storage = var.rds_allocated_storage
   rds_engine_version    = var.rds_engine_version

@@ -44,14 +44,14 @@ def lambda_handler(event, context):
             targets_to_register = [{'Id': ip} for ip in ips_to_add]
             elbv2.register_targets(TargetGroupArn=NLB_TARGET_GROUP_ARN, Targets=targets_to_register)
             print(f"Registered new IPs: {ips_to_add}")
-            output_body = f"Update - Registered new IPs for {SERVICE_FQDN}: {ips_to_add}\n"
+            output_body += f"Update - Registered new IPs for {SERVICE_FQDN}: {ips_to_add}\n"
         
         # Deregister old IPs
         if ips_to_remove:
             targets_to_deregister = [{'Id': ip} for ip in ips_to_remove]
             elbv2.deregister_targets(TargetGroupArn=NLB_TARGET_GROUP_ARN, Targets=targets_to_deregister)
             print(f"Update - Deregistered old IPs for {SERVICE_FQDN}: {ips_to_remove}")
-            output_body = f"Update - Deregistered old IPs for {SERVICE_FQDN}: {ips_to_remove}\n"
+            output_body += f"Update - Deregistered old IPs for {SERVICE_FQDN}: {ips_to_remove}\n"
         
         if not ips_to_add and not ips_to_remove:
             output_body += f"No IP updates for {SERVICE_FQDN}\n"

@@ -81,9 +81,15 @@ variable "rds_allocated_storage" {
 }
 
 variable "rds_engine_version" {
-  description = "RDS engine version"
+  description = "RDS PostgreSQL engine version. Note: AWS retires old minor versions; pick one currently offered by RDS (aws rds describe-db-engine-versions --engine postgres)."
   type        = string
-  default     = "15.12"
+  default     = "15.18"
+}
+
+variable "db_password_version" {
+  description = "Increment to push a changed db_password to the RDS instance (write-only password versioning)"
+  type        = number
+  default     = 1
 }
 
 variable "secret_name" {
